@@ -1,0 +1,6 @@
+[
+	{ "button": "scroll_up", "modifiers": ["ctrl"], "command": "move", "args": {"by": "pages", "forward": false} },
+	{ "button": "scroll_down", "modifiers": ["ctrl"], "command": "move", "args": {"by": "pages", "forward": true} },
+
+	{ "button": "button1", "modifiers": ["alt"], "count": 1, "press_command": "drag_select", "command": "goto_definition" },
+]
