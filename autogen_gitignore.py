@@ -49,7 +49,8 @@ sublime = {
 	"comment": "ignore sublime cache",
 	"ignore": [
 		"Package Control*",
-		"PythonTestRunner*"
+		"PythonTestRunner*",
+		"Preferences.sublime-settings"
 	]
 }
 
