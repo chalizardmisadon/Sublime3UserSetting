@@ -8,10 +8,12 @@
 .*/
 **/release
 **/build
+Deviot/
 
 # ignore files
 *.patch
 *.o
+deviot.*
 
 # include makefiles
 !Makefile

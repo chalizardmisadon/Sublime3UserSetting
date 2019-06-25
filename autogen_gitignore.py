@@ -21,7 +21,8 @@ directories = {
 		".vscode",
 		".*/",
 		"**/release",
-		"**/build"
+		"**/build",
+		"Deviot/"
 	]
 }
 
@@ -29,7 +30,8 @@ files = {
 	"comment": "ignore files",
 	"ignore": [
 		"*.patch",
-		"*.o"
+		"*.o",
+		"deviot.*"
 	]
 }
 
@@ -55,7 +57,8 @@ gitIgnore = [
 	clang,
 	directories,
 	files,
-	makefiles
+	makefiles,
+	sublime
 ]
 
 def addGitIgnoreRules(fd):

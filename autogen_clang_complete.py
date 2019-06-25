@@ -7,14 +7,30 @@ except Exception:
 import os
 
 dirIgnore = [
-	".svn",
-	".git",
-	".vscode",
+	# ".svn",
+	# ".git",
+	# ".vscode",
 	"build",
 	"release",
-	"/."
+	".",
 ]
 
+dirInclude = [
+	# ".vscode",
+	".local",
+]
+
+
+dirArduino = [
+	# "~/.platformio/packages/framework-arduinoteensy/cores/arduino/",
+	# "~/.platformio/packages/framework-arduinoteensy/libraries/__cores__/arduino/",
+	# "~/.platformio/packages/framework-arduinoteensy/cores/",
+	"~/.local/share/umake/ide/arduino/hardware/arduino/avr/cores/arduino/",
+	"~/.local/share/umake/ide/arduino/hardware/arduino/avr/libraries/",
+	"~/.local/share/umake/ide/arduino/hardware/tools/avr/avr/include/",
+	"~/.local/share/umake/ide/arduino/libraries/",
+	# "~/.local/share/umake/ide/arduino/tools/"
+]
 
 def addPreOrderSearch_v1(fd):
 	print("File is generated using Pre Order Searching v1. Loop through all directories.")
@@ -38,12 +54,24 @@ def addFileToRootSearch(fd, currDir, childDir=''):
 		return
 
 	for (dirpath, subdirs, files) in os.walk(currDir, topdown=True):
-		if (dirpath in currDir):
-			subdirs[:] = [d for d in subdirs if d not in childDir]
-		subdirs[:] = [d for d in subdirs if d not in dirIgnore]
+		if (dirpath == currDir):
+			subdirs[:] = [d for d in subdirs if d != childDir]
+		subdirs[:] = [d for d in subdirs if all(i not in d for i in dirIgnore) or any(i in d for i in dirInclude)]
 		fd.write("-I%s\n" % dirpath)
 
 	addFileToRootSearch(fd, os.path.dirname(currDir), os.path.basename(currDir))
+
+
+def addSpecificPath(fd, root, userPath=""):
+	for (dirpath, subdirs, files) in os.walk(root):
+		subdirs[:] = [d for d in subdirs if all(i not in d for i in dirIgnore) or any(i in d for i in dirInclude)]
+		fd.write("-I%s\n" % dirpath.replace(userPath, "~"))
+
+
+def addArduinoPath(fd, userPath=""):
+	print("Adding Arduino paths using Platformio packages")
+	for path in dirArduino:
+		addSpecificPath(fd, path.replace("~", userPath), userPath)
 
 
 def main():
@@ -79,6 +107,17 @@ try:
 			os.chdir(projVar["folder"])
 			fd = open(".clang_complete", "w")
 			addPreOrderSearch_v2(fd)
+			fd.close()
+			printFinishGen()
+
+	class GenClangArduinoCommand(sublime_plugin.WindowCommand):
+		def run(self):
+			self.addArduinoPath()
+
+		def addArduinoPath(self):
+			userPath = "/home/jerry"
+			fd = open(".clang_complete", "a")
+			addArduinoPath(fd, userPath)
 			fd.close()
 			printFinishGen()
 
