@@ -21,7 +21,7 @@ directories = {
 		".vscode",
 		".*/",
 		"**/release",
-		"**/build",
+		"**/build/*",  # don't ignore all files
 		"Deviot/"
 	]
 }
@@ -41,7 +41,11 @@ makefiles = {
 		"Makefile",
 		"makefile",
 		"*.mk",
-		"*.make"
+		"*.make",
+		"build/Makefile",
+		"build/makefile",
+		"build/*.mk",
+		"build/*.make"
 	]
 }
 
