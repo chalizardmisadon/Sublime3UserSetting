@@ -22,7 +22,6 @@ directories = {
 		".*/",
 		"**/release",
 		"**/build/*",  # don't ignore all files
-		"Deviot/"
 	]
 }
 
@@ -31,7 +30,6 @@ files = {
 	"ignore": [
 		"*.patch",
 		"*.o",
-		"deviot.*"
 	]
 }
 
@@ -45,11 +43,12 @@ makefiles = {
 		"build/Makefile",
 		"build/makefile",
 		"build/*.mk",
-		"build/*.make"
+		"build/*.make",
+		"makerules"
 	]
 }
 
-sublime = {
+sublime_cache = {
 	"comment": "ignore sublime cache",
 	"ignore": [
 		"Package Control*",
@@ -58,16 +57,40 @@ sublime = {
 	]
 }
 
+sublime_packages = {
+	"comment": "ignore sublime packages",
+	"ignore": [
+		"SBSCompare*",
+	]
+}
+
+sublime_languages = {
+	"comment": "ignore sublime languages",
+	"ignore": [
+		"R.sublime-settings",
+		"ARM Assembly.sublime-settings",
+	]
+}
+
+platformio = {
+	"comment": "ignore / include platformio",
+	"ignore": [
+		"Deviot/",
+		"deviot.*",
+		".travis.yml",
+	]
+}
+
 gitIgnore = [
 	clang,
 	directories,
 	files,
 	makefiles,
-	sublime
+	platformio
 ]
 
-def addGitIgnoreRules(fd):
-	for dictionary in gitIgnore:
+def addGitIgnoreRules(fd, ignore):
+	for dictionary in ignore:
 		if "comment" in dictionary:
 				fd.write("# %s\n" % dictionary["comment"])  # add comment of type
 		if "ignore" in dictionary:
@@ -80,22 +103,30 @@ def addGitIgnoreRules(fd):
 
 def main():
 	fd = open(".gitignore", "w")
-	addGitIgnoreRules(fd)
+	addGitIgnoreRules(fd, gitIgnore)
 	fd.close()
-	# print("Generated .clang_complete")
 
+def sublime_gitignore():
+	if "sublime-text" in os.getcwd():
+		sublimeIgnore = [
+			sublime_cache,
+			sublime_packages,
+			sublime_languages,
+		]
+		fd = open(".gitignore", "a")
+		addGitIgnoreRules(fd, sublimeIgnore)
+		fd.close()
+
+# start of program here
 try:
 	class GenGitignoreCommand(sublime_plugin.WindowCommand):
 		def run(self):
 			dirVar = self.window.folders()[0]
 			os.chdir(dirVar)
 			main()
+			sublime_gitignore()
 			print("Generated .gitignore @ %s" % dirVar)
 except Exception:
 	print("Script is not running in a Sublime environment!\nGenerated .gitignore in current script directory.")
 	main()
-	if "sublime-text" in os.getcwd():
-		gitIgnore = [sublime]
-		fd = open(".gitignore", "a")
-		addGitIgnoreRules(fd)
-		fd.close()
+	sublime_gitignore()

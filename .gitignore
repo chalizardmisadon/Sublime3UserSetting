@@ -7,22 +7,37 @@
 .vscode
 .*/
 **/release
-**/build
-Deviot/
+**/build/*
 
 # ignore files
 *.patch
 *.o
-deviot.*
 
 # include makefiles
 !Makefile
 !makefile
 !*.mk
 !*.make
+!build/Makefile
+!build/makefile
+!build/*.mk
+!build/*.make
+!makerules
+
+# ignore / include platformio
+Deviot/
+deviot.*
+.travis.yml
 
 # ignore sublime cache
 Package Control*
 PythonTestRunner*
 Preferences.sublime-settings
+
+# ignore sublime packages
+SBSCompare*
+
+# ignore sublime languages
+R.sublime-settings
+ARM Assembly.sublime-settings
 

@@ -6,6 +6,9 @@ except Exception:
 	pass
 import os
 
+
+# ========================= Directory Dictionaries ========================= #
+
 dirIgnore = [
 	# ".svn",
 	# ".git",
@@ -21,16 +24,37 @@ dirInclude = [
 ]
 
 
-dirArduino = [
-	# "~/.platformio/packages/framework-arduinoteensy/cores/arduino/",
-	# "~/.platformio/packages/framework-arduinoteensy/libraries/__cores__/arduino/",
-	# "~/.platformio/packages/framework-arduinoteensy/cores/",
-	"~/.local/share/umake/ide/arduino/hardware/arduino/avr/cores/arduino/",
-	"~/.local/share/umake/ide/arduino/hardware/arduino/avr/libraries/",
-	"~/.local/share/umake/ide/arduino/hardware/tools/avr/avr/include/",
-	"~/.local/share/umake/ide/arduino/libraries/",
-	# "~/.local/share/umake/ide/arduino/tools/"
+dirArduino = {
+	"comment": "Adding Arduino paths using Platformio packages",
+	"path": [
+		# "~/.platformio/packages/framework-arduinoteensy/cores/arduino/",
+		# "~/.platformio/packages/framework-arduinoteensy/libraries/__cores__/arduino/",
+		# "~/.platformio/packages/framework-arduinoteensy/cores/",
+		"~/.local/share/umake/ide/arduino/hardware/arduino/avr/cores/arduino/",
+		"~/.local/share/umake/ide/arduino/hardware/arduino/avr/libraries/",
+		"~/.local/share/umake/ide/arduino/hardware/tools/avr/avr/include/",
+		"~/.local/share/umake/ide/arduino/libraries/",
+		# "~/.local/share/umake/ide/arduino/tools/"
+	]
+}
+
+dirSTM32 = {
+	"comment": "Adding STM32 driver paths within ~/STM32Cube directory",
+	"path": [
+		"~/STM32Cube/Repository/STM32Cube_FW_L4_V1.14.0/Drivers/",
+		# "~/STM32Cube/Repository/STM32Cube_FW_L4_V1.14.0/Drivers/STM32L4xx_HAL_Driver/",
+		# "~/STM32Cube/Repository/STM32Cube_FW_L4_V1.14.0/Drivers/CMSIS/Device/",
+	]
+}
+
+
+dirExtraLib = [
+	dirArduino,
+	dirSTM32
 ]
+
+
+# ========================= Search Algorithm ========================= #
 
 def addPreOrderSearch_v1(fd):
 	print("File is generated using Pre Order Searching v1. Loop through all directories.")
@@ -62,28 +86,41 @@ def addFileToRootSearch(fd, currDir, childDir=''):
 	addFileToRootSearch(fd, os.path.dirname(currDir), os.path.basename(currDir))
 
 
+def checkFileExistPath(fd, newPath):
+	fd.seek(0)  # reset file pointer to beginning
+	line = fd.readlines()
+	path = [p for p in newPath if all(p not in l for l in line)]
+	# print(line)
+	# print(path)
+	return path
+
+
 def addSpecificPath(fd, root, userPath=""):
 	for (dirpath, subdirs, files) in os.walk(root):
 		subdirs[:] = [d for d in subdirs if all(i not in d for i in dirIgnore) or any(i in d for i in dirInclude)]
 		fd.write("-I%s\n" % dirpath.replace(userPath, "~"))
 
 
-def addArduinoPath(fd, userPath=""):
-	print("Adding Arduino paths using Platformio packages")
-	for path in dirArduino:
-		addSpecificPath(fd, path.replace("~", userPath), userPath)
+def addExtraLibPath(fd, userPath=""):
+	for lib in dirExtraLib:
+		print(lib["comment"])
+		path = checkFileExistPath(fd, lib["path"])
+		for p in path:
+			addSpecificPath(fd, p.replace("~", userPath), userPath)
 
 
 def main():
-	fd = open(".clang_complete", "w")
-	addPreOrderSearch_v2(fd)
-	fd.close()
+	with open(".clang_complete", "w") as fd:
+		addPreOrderSearch_v2(fd)
 	printFinishGen()
 
 
 def printFinishGen():
 	print("Generated .clang_complete @ \"%s\"" % os.getcwd())
 
+
+
+# ========================= Sublime Plugins ========================= #
 
 try:
 	class GenClangCompleteCommand(sublime_plugin.WindowCommand):
@@ -97,31 +134,31 @@ try:
 				return
 			
 			os.chdir(projVar["folder"])
-			fd = open(".clang_complete", "w")
-			addFileToRootSearch(fd, "./" + os.path.relpath(projVar["file_path"], projVar["folder"]))
-			fd.close()
+			with open(".clang_complete", "w") as fd:
+				addFileToRootSearch(fd, "./" + os.path.relpath(projVar["file_path"], projVar["folder"]))
 			printFinishGen()
 
 		def addPreOrderSearch(self):
 			projVar = self.window.extract_variables()
 			os.chdir(projVar["folder"])
-			fd = open(".clang_complete", "w")
-			addPreOrderSearch_v2(fd)
-			fd.close()
+			with open(".clang_complete", "w") as fd:
+				addPreOrderSearch_v2(fd)
 			printFinishGen()
 
-	class GenClangArduinoCommand(sublime_plugin.WindowCommand):
+	class GenClangExtraLibCommand(sublime_plugin.WindowCommand):
 		def run(self):
-			self.addArduinoPath()
+			self.addExtraLibPath()
 
-		def addArduinoPath(self):
+		def addExtraLibPath(self):
 			userPath = "/home/jerry"
-			fd = open(".clang_complete", "a")
-			addArduinoPath(fd, userPath)
-			fd.close()
+			with open(".clang_complete", "a+") as fd:
+				addExtraLibPath(fd, userPath)
 			printFinishGen()
 
 
 except Exception:
-	print("Script is not running in a Sublime environment!\nGenerated .clang_complete in current script directory.")
+	print(
+		"Script is not running in a Sublime environment!\n"
+		"Generated .clang_complete in current script directory."
+	)
 	main()

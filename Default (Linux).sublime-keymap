@@ -15,9 +15,9 @@
 	{ "keys": ["ctrl+shift+t"], "command": "reopen_last_file" },
 	{ "keys": ["ctrl+alt+o"], "command": "prompt_open_folder" },
 
-	{ "keys": ["ctrl+g"], "command": "goto_definition" },
+	{ "keys": ["ctrl+g"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":"} },
 
 	{ "keys": ["ctrl+alt+1"], "command": "gen_clang_complete"},
 	{ "keys": ["ctrl+alt+2"], "command": "gen_gitignore"},
-	{ "keys": ["ctrl+alt+3"], "command": "gen_clang_arduino"}
+	{ "keys": ["ctrl+alt+3"], "command": "gen_clang_extra_lib"}
 ]
