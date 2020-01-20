@@ -150,7 +150,7 @@ try:
 			self.addExtraLibPath()
 
 		def addExtraLibPath(self):
-			userPath = "/home/jerry"
+			userPath = os.path.expanduser("~")
 			with open(".clang_complete", "a+") as fd:
 				addExtraLibPath(fd, userPath)
 			printFinishGen()
