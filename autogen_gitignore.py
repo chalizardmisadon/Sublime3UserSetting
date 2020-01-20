@@ -30,6 +30,8 @@ files = {
 	"ignore": [
 		"*.patch",
 		"*.o",
+		"*.symlink", # gitignore treat symlinks as files
+		"*.bak",
 	]
 }
 
