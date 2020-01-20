@@ -21,6 +21,7 @@ dirIgnore = [
 dirInclude = [
 	# ".vscode",
 	".local",
+	".symlink"
 ]
 
 
@@ -77,7 +78,7 @@ def addFileToRootSearch(fd, currDir, childDir=''):
 		print("Root Folder reached in recursive search.")
 		return
 
-	for (dirpath, subdirs, files) in os.walk(currDir, topdown=True):
+	for (dirpath, subdirs, files) in os.walk(currDir, topdown=True, followlinks=True):
 		if (dirpath == currDir):
 			subdirs[:] = [d for d in subdirs if d != childDir]
 		subdirs[:] = [d for d in subdirs if all(i not in d for i in dirIgnore) or any(i in d for i in dirInclude)]
